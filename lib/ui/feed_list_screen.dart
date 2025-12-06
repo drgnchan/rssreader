@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../state/providers.dart';
 import '../state/session_controller.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class FeedListScreen extends ConsumerWidget {
   const FeedListScreen({super.key});
@@ -50,6 +51,7 @@ class FeedListScreen extends ConsumerWidget {
                 final feed = sorted[index];
                 final unread = feed.unreadCount;
                 return ListTile(
+                  leading: _FeedIcon(title: feed.title, htmlUrl: feed.htmlUrl),
                   title: Text(feed.title),
                   subtitle: Text(feed.id),
                   trailing: unread != null
@@ -74,5 +76,45 @@ class FeedListScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+class _FeedIcon extends StatelessWidget {
+  const _FeedIcon({required this.title, required this.htmlUrl});
+
+  final String title;
+  final String? htmlUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = _faviconUrl(htmlUrl);
+    final fallback = CircleAvatar(
+      radius: 16,
+      backgroundColor: Colors.grey.shade300,
+      child: Text(
+        title.isNotEmpty ? title.characters.first.toUpperCase() : '?',
+        style: const TextStyle(fontSize: 14, color: Colors.black87),
+      ),
+    );
+    if (url == null) return fallback;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: 32,
+        height: 32,
+        fit: BoxFit.cover,
+        errorWidget: (_, __, ___) => fallback,
+        placeholder: (_, __) => fallback,
+      ),
+    );
+  }
+
+  String? _faviconUrl(String? pageUrl) {
+    if (pageUrl == null) return null;
+    final uri = Uri.tryParse(pageUrl.trim());
+    if (uri == null || uri.host.isEmpty) return null;
+    final scheme = uri.scheme.isEmpty ? 'https' : uri.scheme;
+    return '$scheme://${uri.host}/favicon.ico';
   }
 }
