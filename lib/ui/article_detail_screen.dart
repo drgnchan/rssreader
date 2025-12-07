@@ -73,9 +73,24 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         data: (_) => _ArticleBody(
           item: item,
           onOpenInBrowser: () => _openInBrowser(item),
+          onLinkTap: (url) => _handleLinkTap(url),
         ),
       ),
     );
+  }
+
+  Future<void> _handleLinkTap(String? url) async {
+    if (url == null) return;
+    final uri = _normalizeUrl(url);
+    if (uri == null) {
+      _showError('无法打开链接: $url');
+      return;
+    }
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      _showError('无法打开链接: $url');
+    }
   }
 
   ItemDto? _resolveItem(AsyncValue<List<ItemDto>> articles) {
@@ -115,10 +130,15 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
 }
 
 class _ArticleBody extends StatelessWidget {
-  const _ArticleBody({required this.item, required this.onOpenInBrowser});
+  const _ArticleBody({
+    required this.item,
+    required this.onOpenInBrowser,
+    required this.onLinkTap,
+  });
 
   final ItemDto item;
   final VoidCallback onOpenInBrowser;
+  final Function(String?) onLinkTap;
 
   @override
   Widget build(BuildContext context) {
@@ -128,46 +148,52 @@ class _ArticleBody extends StatelessWidget {
       item.published * 1000,
       isUtc: true,
     ).toLocal().toIso8601String();
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InkWell(
-            onTap: onOpenInBrowser,
-            child: Text(
-              item.title,
-              style: Theme.of(context).textTheme.titleLarge,
+    return SelectionArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: onOpenInBrowser,
+              child: Text(
+                item.title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              if (item.author != null) Text(item.author!),
-              const SizedBox(width: 12),
-              Text(published.substring(0, 16)),
-            ],
-          ),
-          if (item.alternate?.href.isNotEmpty == true) ...[
             const SizedBox(height: 8),
-            Text(
-              item.alternate!.href,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.blueGrey),
+            Row(
+              children: [
+                if (item.author != null) Text(item.author!),
+                const SizedBox(width: 12),
+                Text(published.substring(0, 16)),
+              ],
+            ),
+            if (item.alternate?.href.isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              Text(
+                item.alternate!.href,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.blueGrey),
+              ),
+            ],
+            const SizedBox(height: 16),
+            Html(
+              data: html,
+              style: {
+                "img": Style(
+                  width: Width(100, Unit.percent),
+                  height: Height.auto(),
+                ),
+                "a": Style(
+                  textDecoration: TextDecoration.none,
+                ),
+              },
+              onLinkTap: (url, context, attributes) => onLinkTap(url),
             ),
           ],
-          const SizedBox(height: 16),
-          Html(
-            data: html,
-            onLinkTap: (url, __, ___) {
-              // In a fuller version, add url_launcher to open links.
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(url ?? '')));
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
