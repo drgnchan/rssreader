@@ -41,11 +41,10 @@ class ArticleListScreen extends ConsumerWidget {
         onRefresh: onRefresh,
         child: articles.when(
           data: (items) {
-            final sorted = [...items]
+            final visible = [...items]
               ..sort((a, b) => b.published.compareTo(a.published));
-            final visible = unreadOnly
-                ? sorted.where((i) => !i.isRead).toList()
-                : sorted;
+            // Keep already loaded items visible even when marked read locally; the
+            // server-side unread filter is applied on refresh/re-enter.
             if (visible.isEmpty) return const Center(child: Text('暂无内容'));
             return ListView.separated(
               itemCount: visible.length,
