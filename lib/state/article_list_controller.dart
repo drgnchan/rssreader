@@ -4,6 +4,7 @@ import '../data/freshrss_repository.dart';
 import '../data/models.dart';
 import 'core_providers.dart';
 import 'filters.dart';
+import 'providers.dart';
 import 'session_controller.dart';
 
 final articleListProvider =
@@ -42,6 +43,7 @@ class ArticleListController
     try {
       final token = await _requireToken();
       await _repo.markRead(token, itemId, read);
+      ref.invalidate(subscriptionsProvider);
     } catch (_) {
       if (previous != null) state = AsyncData(previous);
     }
