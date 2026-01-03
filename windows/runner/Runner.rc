@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "readyou" "\0"
+            VALUE "FileDescription", "MyRSSReader" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "readyou" "\0"
+            VALUE "InternalName", "MyRSSReader" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "readyou.exe" "\0"
-            VALUE "ProductName", "readyou" "\0"
+            VALUE "OriginalFilename", "MyRSSReader.exe" "\0"
+            VALUE "ProductName", "MyRSSReader" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

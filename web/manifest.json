@@ -1,6 +1,6 @@
 {
-    "name": "readyou",
-    "short_name": "readyou",
+    "name": "MyRSSReader",
+    "short_name": "MyRSSReader",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
