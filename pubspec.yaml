@@ -70,6 +70,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  fonts:
+    - family: OPPOSans
+      fonts:
+        - asset: "assets/fonts/opposans/OPPO Sans 4.0.ttf"
+
 flutter_icons:
   image_path: assets/icon.png
   android: true

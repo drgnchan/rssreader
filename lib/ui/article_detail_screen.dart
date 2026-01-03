@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/models.dart';
@@ -48,6 +49,14 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
       articleListProvider(widget.nav.streamId).notifier,
     );
     final item = _resolveItem(articles) ?? widget.nav.item;
+    final sorted = _sortedItems(articles);
+    final currentIndex = sorted.indexWhere((i) => i.id == item.id);
+    final previousItem =
+        currentIndex > 0 ? sorted[currentIndex - 1] : null;
+    final nextItem =
+        currentIndex >= 0 && currentIndex < sorted.length - 1
+            ? sorted[currentIndex + 1]
+            : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,6 +85,33 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
           onLinkTap: (url) => _handleLinkTap(url),
         ),
       ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.chevron_left),
+                  label: const Text('上一篇'),
+                  onPressed: previousItem == null
+                      ? null
+                      : () => _navigateTo(previousItem),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  icon: const Icon(Icons.chevron_right),
+                  label: const Text('下一篇'),
+                  onPressed:
+                      nextItem == null ? null : () => _navigateTo(nextItem),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -97,6 +133,22 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     final list = articles.valueOrNull;
     if (list == null) return null;
     return list.where((i) => i.id == widget.nav.item.id).toList().firstOrNull;
+  }
+
+  List<ItemDto> _sortedItems(AsyncValue<List<ItemDto>> articles) {
+    final list = articles.valueOrNull;
+    if (list == null) return const [];
+    final sorted = [...list]
+      ..sort((a, b) => b.published.compareTo(a.published));
+    return sorted;
+  }
+
+  void _navigateTo(ItemDto item) {
+    if (!mounted) return;
+    context.pushReplacement(
+      '/article',
+      extra: ArticleNav(streamId: widget.nav.streamId, item: item),
+    );
   }
 
   Future<void> _openInBrowser(ItemDto item) async {

@@ -83,6 +83,7 @@ class ReadyYouApp extends ConsumerWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        fontFamily: 'OPPOSans',
       ),
       routerConfig: router,
     );
