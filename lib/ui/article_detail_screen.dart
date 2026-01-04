@@ -79,37 +79,56 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
       body: articles.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('加载失败: $e')),
-        data: (_) => _ArticleBody(
-          item: item,
-          onOpenInBrowser: () => _openInBrowser(item),
-          onLinkTap: (url) => _handleLinkTap(url),
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.chevron_left),
-                  label: const Text('上一篇'),
-                  onPressed: previousItem == null
-                      ? null
-                      : () => _navigateTo(previousItem),
+        data: (_) => Row(
+          children: [
+            Expanded(
+              child: _ArticleBody(
+                item: item,
+                onOpenInBrowser: () => _openInBrowser(item),
+                onLinkTap: (url) => _handleLinkTap(url),
+              ),
+            ),
+            SafeArea(
+              minimum: const EdgeInsets.only(right: 16),
+              child: Align(
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          padding: EdgeInsets.zero,
+                        ),
+                        onPressed: previousItem == null
+                            ? null
+                            : () => _navigateTo(previousItem),
+                        child: const Icon(Icons.chevron_left),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          padding: EdgeInsets.zero,
+                        ),
+                        onPressed: nextItem == null
+                            ? null
+                            : () => _navigateTo(nextItem),
+                        child: const Icon(Icons.chevron_right),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  icon: const Icon(Icons.chevron_right),
-                  label: const Text('下一篇'),
-                  onPressed:
-                      nextItem == null ? null : () => _navigateTo(nextItem),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
