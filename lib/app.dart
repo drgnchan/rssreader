@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'state/providers.dart';
 import 'state/session_controller.dart';
+import 'ui/ai_settings_screen.dart';
 import 'ui/article_detail_screen.dart';
 import 'ui/article_list_screen.dart';
 import 'ui/feed_list_screen.dart';
@@ -48,6 +49,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           }
           return ArticleDetailScreen(nav: extra);
         },
+      ),
+      GoRoute(
+        path: '/settings/ai',
+        builder: (context, state) => const AiSettingsScreen(),
       ),
     ],
     redirect: (context, state) {
