@@ -225,6 +225,7 @@ class _ArticleBody extends ConsumerWidget {
       articleId: item.id,
       title: item.title,
       content: html,
+      url: item.alternate?.href,
     );
     final summaryAsync = ref.watch(articleSummaryProvider(summaryParams));
 

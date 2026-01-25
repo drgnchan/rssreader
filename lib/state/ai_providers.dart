@@ -49,11 +49,13 @@ class ArticleSummaryParams {
     required this.articleId,
     required this.title,
     required this.content,
+    this.url,
   });
 
   final String articleId;
   final String title;
   final String content;
+  final String? url;
 
   @override
   bool operator ==(Object other) =>
@@ -94,9 +96,9 @@ class ArticleSummaryNotifier
         model: settings.model,
         title: arg.title,
         content: arg.content,
+        articleUrl: arg.url,
         enableSearch: settings.enableSearch,
       );
-
       // 更新缓存
       ref.read(summaryCache.notifier).update((cache) {
         return {...cache, arg.articleId: summary};
