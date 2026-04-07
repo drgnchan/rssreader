@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/models.dart';
-import '../state/ai_providers.dart';
 import '../state/article_list_controller.dart';
 
 class ArticleNav {
@@ -201,7 +200,7 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   }
 }
 
-class _ArticleBody extends ConsumerWidget {
+class _ArticleBody extends StatelessWidget {
   const _ArticleBody({
     required this.item,
     required this.onOpenInBrowser,
@@ -213,21 +212,13 @@ class _ArticleBody extends ConsumerWidget {
   final Function(String?) onLinkTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final html =
         item.content?.content ?? item.summary?.content ?? '<p>暂无内容</p>';
     final published = DateTime.fromMillisecondsSinceEpoch(
       item.published * 1000,
       isUtc: true,
     ).toLocal().toIso8601String();
-
-    final summaryParams = ArticleSummaryParams(
-      articleId: item.id,
-      title: item.title,
-      content: html,
-      url: item.alternate?.href,
-    );
-    final summaryAsync = ref.watch(articleSummaryProvider(summaryParams));
 
     return SelectionArea(
       child: SingleChildScrollView(
@@ -260,15 +251,6 @@ class _ArticleBody extends ConsumerWidget {
               ),
             ],
             const SizedBox(height: 16),
-            // AI 摘要区域
-            _SummaryCard(
-              summaryAsync: summaryAsync,
-              onGenerate: () {
-                ref.read(articleSummaryProvider(summaryParams).notifier).generate();
-              },
-              onSettings: () => context.push('/settings/ai'),
-            ),
-            const SizedBox(height: 16),
             Html(
               data: html,
               style: {
@@ -289,97 +271,6 @@ class _ArticleBody extends ConsumerWidget {
   }
 }
 
-/// AI 摘要卡片组件
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.summaryAsync,
-    required this.onGenerate,
-    required this.onSettings,
-  });
-
-  final AsyncValue<String?> summaryAsync;
-  final VoidCallback onGenerate;
-  final VoidCallback onSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.auto_awesome, size: 18, color: colorScheme.primary),
-                const SizedBox(width: 6),
-                Text(
-                  'AI 摘要',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.settings, size: 18),
-                  tooltip: 'AI 设置',
-                  onPressed: onSettings,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            summaryAsync.when(
-              data: (summary) {
-                if (summary == null) {
-                  return OutlinedButton.icon(
-                    onPressed: onGenerate,
-                    icon: const Icon(Icons.auto_awesome, size: 16),
-                    label: const Text('生成摘要'),
-                  );
-                }
-                return Text(
-                  summary,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                );
-              },
-              loading: () => const Row(
-                children: [
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  SizedBox(width: 8),
-                  Text('正在生成摘要...'),
-                ],
-              ),
-              error: (e, _) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '生成失败: $e',
-                    style: TextStyle(color: colorScheme.error),
-                  ),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: onGenerate,
-                    icon: const Icon(Icons.refresh, size: 16),
-                    label: const Text('重试'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 extension _FirstOrNull<T> on List<T> {
   T? get firstOrNull => isEmpty ? null : first;
